@@ -1,4 +1,4 @@
-(ns funcdb-clojure.core-test
+(ns funcdb.core-test
   (:use clojure.test
         funcdb-clojure.core))
 
