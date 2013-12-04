@@ -19,8 +19,20 @@
   "Generates a unique value for a collection of attributes which identifies an
   entity.  No future entities will ever be given the same identity.  The second
   part of the tuple is a new version of the identify function."
-  [attributes]
-  ())
+  [next-id]
+  (fn [a] [next-id (identify-sequential (+ 1 next-id))]))
+
+(def attribs {:name "foo"})
+(let  [call1 ((identify-sequential 0) attribs)
+       call2 ((call1 1) attribs)]
+  (call2 0))
+
+(defn identify-sequential-sync
+  "Synchronized version"
+  [next-id]
+  (let [next (atom (dec next-id))]
+    (fn [a] (swap! next inc))))
+
 
 (defn identify-by-name
   "Unsynchronized.  Expects the all maps to contain a name attribute."
