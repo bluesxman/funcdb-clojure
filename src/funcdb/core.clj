@@ -30,10 +30,14 @@
   "Simple sequence of version numbers.  Synchronized so no two DB transactions can create same version."
   [next-ver]
   (let [next (atom (dec next-ver))]
-    (fn [attributes predicate transform] (swap! next inc))))
+    (fn [change accum] (swap! next inc))))
+
+; apply the change and get an entity
+; eval the entity and accumulate a value
+; when finished, apply the accumulated value as the mark to all touched facts, entities and db
 
 (defn mark-by-hash
-  "Computes a hash for a set of changes."
+  "Computes a hash for a sequence of changes."
   [changes db]
   ()) 
 
