@@ -1,4 +1,5 @@
-(ns funcdb.core)
+(ns funcdb.core
+  "A simple persistent data type which never forgets.")
 
 ; Types
 ; Everything has a notional timestamp which is really a version number.
@@ -8,30 +9,16 @@
 ; attributes are mapping of attribute name to a list of facts
 (defrecord Entity [id attributes time])
 
-; identify is a fn that takes a map and returns a tuple of the a unique identity and a new version of itself
-; mark is a fn that returns a tuple of the time of the transaction unique to that transaction and a new
-; version of itself
+; identify is a fn that takes a map and returns unique identity for an entity
+; mark is a fn that returns a unique identity for a transaction
 (defrecord Database [name entities indentify mark])
-
 
 ;;; Helper functions for a database
 (defn identify-sequential
-  "Generates a unique value for a collection of attributes which identifies an
-  entity.  No future entities will ever be given the same identity.  The second
-  part of the tuple is a new version of the identify function."
-  [next-id]
-  (fn [a] [next-id (identify-sequential (+ 1 next-id))]))
-
-(def attribs {:name "foo"})
-(let  [call1 ((identify-sequential 0) attribs)
-       call2 ((call1 1) attribs)]
-  (call2 0))
-
-(defn identify-sequential-sync
   "Synchronized version"
   [next-id]
   (let [next (atom (dec next-id))]
-    (fn [a] (swap! next inc))))
+    (fn [attibutes] (swap! next inc))))
 
 
 (defn identify-by-name
@@ -41,8 +28,9 @@
 
 (defn mark-sequential
   "Simple sequence of version numbers.  Synchronized so no two DB transactions can create same version."
-  [changes db]
-  ()) 
+  [next-ver]
+  (let [next (atom (dec next-ver))]
+    (fn [attributes predicate transform] (swap! next inc))))
 
 (defn mark-by-hash
   "Computes a hash for a set of changes."
@@ -69,7 +57,7 @@
   [name idGen timeGen]
   (println "Creating database" name))
 
-(defn addAll
+(defn add-all
   "Adds entities to a DB.  An entity is described by a map of named values."
   [entities db idGen timeGen]
   ())
@@ -79,12 +67,12 @@
   [where attibutes db timeGen]
   ())
 
-(defn selectNow
+(defn select-now
   "Creates a sequence of entities which match the predicate"
   [where db]
   ())
 
-(defn mergeDBs
+(defn merge-db
   "Attempts to merge the src database into the dst database.  A new database is
   created with the merged changes with a list of entities which failed to merge"
   [src dst] 
