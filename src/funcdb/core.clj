@@ -21,10 +21,17 @@
     (fn [attibutes] (swap! next inc))))
 
 
-(defn identify-by-name
-  "Unsynchronized.  Expects the all maps to contain a name attribute."
-  [attributes]
-  ()) 
+(defn identify-by-key
+  "Synchronized.  Ensures values for key attribute are unique. Reserved values cannot be identities.
+  Returns nil if the key is already taken."
+  [key-name reserved]
+  (let [taken (atom reserved)]
+    (fn [attributes] 
+      (let [key-value (attributes key-name)]
+        (if (not (contains? taken key-value))
+          (swap! taken (conj taken key-value)))
+        key-value
+        ))))
 
 (defn mark-sequential
   "Simple sequence of version numbers.  Synchronized so no two DB transactions can create same version."
