@@ -4,10 +4,10 @@
 ; Types
 ; Everything has a notional timestamp which is really a version number.
 
-(defrecord Fact [value time])
+(defrecord Fact [value ver])
 
 ; attributes are mapping of attribute name to a list of facts
-(defrecord Entity [id attributes time])
+(defrecord Entity [id attributes ver])
 
 ; identify is a fn that takes a map and returns unique identity for an entity
 ; mark is a fn that returns a unique identity for a transaction
@@ -16,8 +16,8 @@
 ;;; Helper functions for a database
 (defn identify-sequential
   "Synchronized version"
-  [next-id]
-  (let [next (atom (dec next-id))]
+  [first-id]
+  (let [next (atom (dec first-id))]
     (fn [attibutes] (swap! next inc))))
 
 
@@ -35,8 +35,8 @@
 
 (defn mark-sequential
   "Simple sequence of version numbers.  Synchronized so no two DB transactions can create same version."
-  [next-ver]
-  (let [next (atom (dec next-ver))]
+  [first-ver]
+  (let [next (atom (dec first-ver))]
     (fn [change accum] (swap! next inc))))
 
 ; apply the change and get an entity
@@ -73,18 +73,38 @@
   [entities db idGen timeGen]
   ())
 
+; probably delete this method
 (defn update
   "Assign the list of attribute values to entities matching the predicate"
   [where attibutes db timeGen]
   ())
 
-(defn select-now
-  "Creates a sequence of entities which match the predicate"
-  [where db]
+; filter entities, map a xform, merge new entity versions to db
+
+(defn anytime
+  "Creates a sequence of all entities at anytime.  Entities will appear more than once, representing the entity at
+  different points in time."
+  [db]
   ())
+
+(defn now 
+  "Creates a sequences of entities with their attributes at time now"
+  [db]
+  ())
+
+(defn when
+  "Creates a sequences of entities with their attributes at time now"
+  [db time]
+  ())
+
+; Select can just be filters on the sequences
 
 (defn merge-db
   "Attempts to merge the src database into the dst database.  A new database is
   created with the merged changes with a list of entities which failed to merge"
   [src dst] 
+  ())
+
+(defn merge-entities
+  [entities db]
   ())
