@@ -108,3 +108,9 @@
 (defn merge-entities
   [entities db]
   ())
+
+(defn- attrib-changed?
+  [facts1 facts2]
+  (let [ver1 (:ver (first facts1))
+        ver2 (:ver (first facts2))]
+    (= ver1 ver2)))
