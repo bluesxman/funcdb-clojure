@@ -92,7 +92,7 @@
   [db]
   ())
 
-(defn when
+(defn when-time
   "Creates a sequences of entities with their attributes at time now"
   [db time]
   ())
@@ -114,3 +114,40 @@
   (let [ver1 (:ver (first facts1))
         ver2 (:ver (first facts2))]
     (= ver1 ver2)))
+
+(defn- diff
+  [entity ver1 ver2]
+  (let [m1 (entity ver1)
+        m2 (entity ver2)]
+    ))
+
+(defn- latest-ver
+  [entity]
+  ())
+
+(defn- find-common
+  [entity1 entity2]
+  ())
+
+; if both entities have changed since their common ancestor
+; and if an attribute has changed value in both entities
+; and that value is different between the two entities
+; then its a collision
+(defn- collision?
+  [entity1 entity2]
+  (let [ver1 (latest-ver entity1)
+        ver2 (latest-ver entity2)
+        common-ver (find-common entity1 entity2)]
+    (if (or (= common-ver ver1) (= common-ver ver2))
+      false
+      (let [diff1 (diff entity1 common-ver ver1)
+            diff2 (diff entity2 common-ver ver2)]
+        (loop [remaining (seq diff1)]
+          (let [entry1 (first remaining)
+                k1 (key entry1)
+                v1 (val entry1)]
+            (if (nil? entry1)
+              false
+              (if (and (contains? diff2 k1) (not= v1 (diff2 k1)))
+                true
+                (recur (rest remaining))))))))))
