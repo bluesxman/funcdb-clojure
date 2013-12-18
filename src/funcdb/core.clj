@@ -123,11 +123,16 @@
 
 (defn- latest-ver
   [entity]
-  ())
+  (key (first (entity :attributes))))
 
 (defn- find-common
+  "Finds the version number that both entities have in common or nil if no common version exists."
   [entity1 entity2]
-  ())
+  (loop [remaining (seq (entity1 :attributes))]
+    (let [ver1 (key (first remaining))]
+      (if (or (nil? ver1) (contains? (entity1 :attributes) ver1))
+        ver1
+        (recur (rest remaining))))))
 
 ; if both entities have changed since their common ancestor
 ; and if an attribute has changed value in both entities
