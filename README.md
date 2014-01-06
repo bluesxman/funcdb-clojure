@@ -1,6 +1,6 @@
 # funcdb-clojure
 
-A Clojure library designed to ... well, that part is up to you.
+Clojure implementation of a functional database for the purpose of exploring functional languages and the idea of a database as a value
 
 ## Usage
 
