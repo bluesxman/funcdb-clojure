@@ -1,37 +1,6 @@
-(ns funcdb.proto)
+(ns funcdb.proto
+  (:require [funcdb.core :refer :all]))
 
-;; Constraints:
-;; 1) Versions are unique in the database; i.e. no two transactions have the same version
-;; 2) The natural ordering of versions represents the order of transactions
-;; 3) Identities are unique within a transaction; i.e. an entity only appears once in a transaction
-
-
-(defn rev-sequential
-  "Simple sequence of version numbers.  Synchronized so no two DB transactions can create same version."
-  [first-ver]
-  (let [next (atom (dec first-ver))]
-    (fn [] (swap! next inc))))
-
-(defn identify-sequential
-  "Synchronized version"
-  [first-id]
-  (let [next (atom (dec first-id))]
-    (fn [] (swap! next inc))))
-
-(defn identify
-  "attribs -> entities. sets :id, :ver is nil"
-  [idfn attributes]
-  (map #(assoc % :id (idfn)) attributes))
-
-(defn transact
-  "sets a version on the entities and creates a new version of the entities in the db"
-  [rev db entities]
-  (let [new-ver (rev)]
-    (assoc db new-ver (reduce #(assoc %1 (:id %2) %2) (first (vals db)) (map #(assoc % :ver new-ver) entities)))))
-
-(defn new-db
-  [rev]
-  (sorted-map-by > (rev) {}))
 (first (sorted-map-by > 5 "a" 1 "b" 3 "c"))
 
 (println
