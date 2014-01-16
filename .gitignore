@@ -12,3 +12,5 @@ pom.xml.asc
 .lein-repl-history
 /bin
 /.settings
+.nrepl-port
+
