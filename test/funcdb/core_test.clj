@@ -1,8 +1,7 @@
 (ns funcdb.core-test
-  (:use clojure.test
-        funcdb.core))
+  (:require [funcdb.core :refer :all]
+            [simple-check.core :as sc]
+            [simple-check.generators :as gen]
+            [simple-check.properties :as prop]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
-
+(gen/sample (gen/map gen/keyword gen/any))
