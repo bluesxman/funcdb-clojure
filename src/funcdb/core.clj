@@ -20,7 +20,7 @@
     (fn [] (swap! next inc))))
 
 (defn identify
-  "Takes a sequence of collections of attributes for new entities.  Sets :id, :ver is set to nil"
+  "Takes a sequence of collections of attributes for new entities.  Sets :id"
   [idfn attributes]
   (map #(assoc % :id (idfn)) attributes))
 
@@ -35,4 +35,3 @@
   "Creates a new database using the provided revision generator.  The database contains 1 version with 0 entities."
   [rev]
   (sorted-map-by > (rev) {}))
-
