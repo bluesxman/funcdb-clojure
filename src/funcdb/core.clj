@@ -22,7 +22,7 @@
 (defn identify
   "Takes a sequence of collections of attributes for new entities.  Sets :id"
   [idfn attributes]
-  (map #(assoc % :id (idfn)) attributes))
+  (assoc attributes :id (idfn)))
 
 (defn transact
   "Associates a new version with the sequence of entities, and creates a new version in the database
