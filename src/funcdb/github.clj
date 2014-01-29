@@ -4,36 +4,6 @@
             [tentacles.repos :as repos]
             [tentacles.users :as users]))
 
-;; :full_name
-;; :language
-;; :updated_at - last commit
-;; :fork - true/false
-
-(def my-repos (repos/user-repos "bluesxman"))
-
-(keys (first my-repos))
-
-(-> (first my-repos) :owner :login)
-
-(count my-repos)
-
-(map #(select-keys % [:forks :forks_count :fork :name ]) my-repos)
-
-(slurp "https://api.github.com/repos/bluesxman/om/languages")
-(slurp "https://api.github.com/repos/bluesxman/FSharp/subscribers")
-
-(repos/contents "bluesxman" "funcdb-clojure" "project.clj" {:keys [true]})
-(slurp "https://api.github.com/repos/bluesxman/funcdb-clojure/contents/project.clj?ref=master")
-
-(read-string (slurp "https://raw.github.com/bluesxman/funcdb-clojure/master/project.clj"))
-
-(def fsharp-watchers (remove empty? (repos/watchers "bluesxman" "FSharp")))
-(identity fsharp-watchers)
-(keys (first fsharp-watchers))
-(map :login (users/followers "bluesxman"))
-(map :login (users/following "bluesxman"))
-
-;;;;;;;;;;;;;;;;;;;
 
 (defrecord Repo [id ver owner name updated-at fork? language])
 (defrecord User [id ver name type])
@@ -51,14 +21,33 @@
   (idfy (to-User (users/user login))))
 
 (defn get-repos [idfy user]
-  (map #(relate % :owner user) (map idfy (remove :fork? (map to-Repo (remove empty? (repos/user-repos (:name user))))))))
+  (map #(assoc % :owner user) (map idfy (remove :fork? (map to-Repo (remove empty? (repos/user-repos (:name user))))))))
 
 (defn get-watchers
   [idfy user repo]
   (map idfy (map to-User (remove empty? (repos/watchers (:name user) (:name repo))))))
 
-(defn relate [child fkey parent]
-  (assoc child fkey (:id parent)))
+(defn get-watchers-for-all
+  [idfy user repos]
+  (remove empty? (map #(get-watchers idfy user %) repos)))
+
+(defn create-watches
+  [idfy users repo]
+  (map idfy (map #(Watches. nil nil % repo) users)))
+
+(defn create-watches-for-all
+  [idfy watchers repos]
+  (flatten (map (fn [[w r]] (create-watches idfy w r)) (map vector watchers repos))))
+
+(defn get-degs
+  [idfy
+   root-login
+   degs]
+  (let [user (get-user idfy root-login)
+        repos (get-repos idfy user)
+        watchers (get-watchers-for-all idfy user repos)
+        watches (create-watches-for-all idfy watchers repos)]
+    (cons user (lazy-cat repos (flatten watchers) watches))))
 
 ;; git-bacon
 ;; start with a user
@@ -70,15 +59,15 @@
 (def root-user (get-user idfy "bluesxman"))
 (identity root-user)
 (def root-repos (get-repos idfy root-user))
-(def root-watchers (flatten (remove empty? (map #(get-watchers idfy root-user %) root-repos))))
+(identity root-repos)
+(def root-watchers (get-watchers-for-all idfy root-user root-repos))
 (identity root-watchers)
 
-(def fsharp-repo (first (filter #(= (:name %) "FSharp") root-repos)))
-(identity fsharp-repo)
 
-(:name root-user)
-(:id fsharp-repo)
 
-(get-watchers idfy root-user fsharp-repo)
+(def root-watches (create-watches-for-all idfy root-watchers root-repos))
+(identity root-watches)
 
-(->> fsharp-repo :owner)
+(def my-degs (get-degs idfy "bluesxman" 1))
+
+(map type my-degs)
